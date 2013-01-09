@@ -5,6 +5,8 @@ main() {
 	model.objectsOfType(Package) -> map toPackage();
 }
 
+
+
 mapping inout crudapp::Package::toPackage() {
 	init {
 	//doesn't work
@@ -24,18 +26,11 @@ mapping inout crudapp::Entity::toEntryWindow(): crudapp::EntryWindow {
 	result.entity := self;
 	result.title := self.name;
 	result.columns := 2;
-	
-	
-	//result.rows += self.properties -> map toRows();
-	
-	/*
+		
 	// map attributes
 	result.rows += self.properties[crudapp::Attribute] -> map attributesToRows();
 	
-	
-	// map single-valued references
-	result.rows += self.properties[crudapp::Reference] -> map singleValuedReferencesToRows();
-	
+	// create Button
 	result.rows += object crudapp::Row {
 		name:="rowButton";
 		elements+= object crudapp::Button{
@@ -45,6 +40,13 @@ mapping inout crudapp::Entity::toEntryWindow(): crudapp::EntryWindow {
 			}
 	};
 	
+	
+	// map single-valued references
+	result.rows += self.properties[crudapp::Reference] -> map singleValuedReferencesToRows();
+	/*
+	
+	
+	
 	// map multi-valued references
 	result.rows += self.properties[crudapp::Reference] -> map singleMultivaluedReferencesToRows();
 */
@@ -52,54 +54,44 @@ mapping inout crudapp::Entity::toEntryWindow(): crudapp::EntryWindow {
 }
 
 
-
-// map helper
-helper createRow(in input: crudapp::Property): crudapp::Row {
-	var row = object crudapp::Row {
-		name := "row" + input.name;
-		elements += object crudapp::Field {
-			name := "field" + input.name;
-			_property := input;
-			label = object crudapp::FieldLabel {text:= input.name}
-		};
-	};
-	return row;
-}
-
-
-
 // map attributes
-mapping crudapp::Attribute::attributesToRows(): crudapp::Row {
-	result:= createRow(self);
-}
-
-
-
-/*
 mapping inout crudapp::Attribute::attributesToRows(): crudapp::Row {
-	result.name := "row" + self.name;
-	result.elements += object crudapp::Field {
-		name := "field" + self.name;
-		_property := self;
-		label = object crudapp::FieldLabel {text:= self.name}
-	};
+		name := "row" + self.name;
+		elements += self -> map createField();
 }
-*/
+
+// map Fields
+mapping inout crudapp::Attribute::createField(): crudapp::Field {
+	name := "field" + self.name;
+	_property := self;
+	label := object crudapp::FieldLabel {text:= self.name};
+}
+
+
+
 
 // map single-valued references
 mapping crudapp::Reference::singleValuedReferencesToRows(): crudapp::Row {
-	if (self.multiplicity!=Multiplicity::MANY) then {
-		result:= createRow(self);
-	} endif
+	name := "row" + self.name;
+	elements += self -> map createFieldForReference();
 }
 
+// map Reference Fields
+mapping inout crudapp::Reference::createFieldForReference(): crudapp::Field {
+	name := "field" + self.name;
+	_property := self;
+	label := object crudapp::FieldLabel {text:= self.name};
+}
+
+
+/*
 // map multi-valued references
 mapping crudapp::Reference::singleMultivaluedReferencesToRows(): crudapp::Row {
 	if (self.multiplicity=Multiplicity::MANY) then {
 		result:= createRow(self);
 	} endif
 }
-
+*/
 
 
 /*
