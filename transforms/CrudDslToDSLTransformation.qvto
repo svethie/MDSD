@@ -1,26 +1,20 @@
 modeltype crudapp "strict" uses crudApp4Dsl('http://www.wwu.de/pi/mdsd4/crudapp/CrudApp4Dsl');
 transformation CrudDslToDSLTransformation(inout model : crudapp);
 
+// entry point for transformation is package
 main() {
 	model.objectsOfType(Package) -> map toPackage();
 }
 
-
-
+// map package
 mapping inout crudapp::Package::toPackage() {
 	init {
-	//doesn't work
 	self.windows += self.entities -> map toEntryWindow();
-	//self.windows -> map toChangeName();
 	}
 }
 
-// works
-mapping inout crudapp::Window::toChangeName()  {
-	self.name := "test";
-}
 
-
+// map entity to EntryWindow
 mapping inout crudapp::Entity::toEntryWindow(): crudapp::EntryWindow {
 	result.name := self.name + "Form";
 	result.entity := self;
@@ -35,36 +29,37 @@ mapping inout crudapp::Entity::toEntryWindow(): crudapp::EntryWindow {
 		name:="rowButton";
 		elements+= object crudapp::Button{
 			name:="buttonCreateEdit";
-			action := Action::CREATE_EDIT;
+			// Action is not properly displayed, for whatever reason
+			action := Action::CREATE_EDIT; 
 			text:=Action::CREATE_EDIT.toString();
 			}
 	};
 	
-	// map references (BUT unsorted)
-	//result.rows += self.properties[crudapp::Reference] -> map ReferencesToRows();
-	
-	/*
+		
 	//map References
-	var _properties := self.properties[crudapp::Reference];
-	_properties->forEach(p){
-		// map single-valued references
-		p -> map ReferencesToRows();
-			
-			
-		}if (p.multiplicity=Multiplicity::ONE) then{ 
-	    	p -> map singleReferencesToRows();
+	var propertiesTEMP := self.properties[crudapp::Reference];
+
+	// map single-valued references	
+	propertiesTEMP->forEach(p){
+		// map single-valued references	
+		if (p.multiplicity=Multiplicity::ONE) then{ 
+	    	result.rows += p -> map ReferencesToRows();
 	    }endif;
-    	
-    	// map optional-valued references
-	    if (p.multiplicity=Multiplicity::OPTIONAL) then{ 
-	    	p -> map singleReferencesToRows();
+	};	
+	
+	// map optional-valued references	
+	propertiesTEMP->forEach(p){	
+		if (p.multiplicity=Multiplicity::OPTIONAL) then{ 
+	    	result.rows += p -> map ReferencesToRows();
 	    }endif;
-    	// map multi-valued references
+	};
+	
+	// map multi-valued references
+   	propertiesTEMP->forEach(p){	     	
 	    if (p.multiplicity=Multiplicity::MANY) then{ 
-	    	p -> map singleReferencesToRows();
-	    }endif;
-	   
-    } */
+	    	result.rows += p -> map ReferencesToRows();
+	    }endif; 	
+    };
 }
 
 
@@ -82,7 +77,6 @@ mapping inout crudapp::Attribute::createField(): crudapp::Field {
 }
 
 
-
 // map reference
 mapping crudapp::Reference::ReferencesToRows(): crudapp::Row {
 	name := "row" + self.name;
@@ -95,5 +89,3 @@ mapping inout crudapp::Reference::createFieldForReference(): crudapp::Field {
 	_property := self;
 	label := object crudapp::FieldLabel {text:= self.name};
 }
-
-
