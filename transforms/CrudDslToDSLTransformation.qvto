@@ -2,39 +2,57 @@ modeltype crudapp "strict" uses crudApp4Dsl('http://www.wwu.de/pi/mdsd4/crudapp/
 transformation CrudDslToDSLTransformation(inout model : crudapp);
 
 main() {
-	model.rootObjects()[crudapp] -> map updateModel();
+	model.objectsOfType(Package) -> map toPackage();
 }
 
-mapping inout crudapp::updateModel() {
-	self.objectsOfType(crudapp::Entity)-> map toEntryWindow();
-	
+property dslPackage : crudapp::Package = null;
+
+mapping inout crudapp::Package::toPackage() {
+	init {
+	dslPackage = self;
+	//doesn't work
+	//self.windows += self.entities -> map toEntryWindow();
+	self.windows += object crudapp::EntryWindow{name="blabla"};
+	}
 }
 
-mapping inout crudapp::Entity::toEntryWindow(): crudapp::EntryWindow {
-	result.name := self.name + "Form";
-	result.entity := self;
-	result.title := self.name;
-	result.columns := 2;
-	//result.rows += self.properties -> map toRows();
-	
-	// map attributes
-	result.rows += self.properties[crudapp::Attribute] -> map attributesToRows();
-	
-	// map single-valued references
-	result.rows += self.properties[crudapp::Reference] -> map singleValuedReferencesToRows();
-	
-	result.rows += object crudapp::Row {
-		name:="rowButton";
-		elements+= object crudapp::Button{
-			name:="buttonCreateEdit";
-			action := Action::CREATE_EDIT;
-			text:=Action::CREATE_EDIT.toString();
-			}
-	};
-	
-	// map multi-valued references
-	result.rows += self.properties[crudapp::Reference] -> map singleMultivaluedReferencesToRows();
+
+
+
+mapping crudapp::Entity::toEntryWindow(): crudapp::EntryWindow {
+	init {
+		result.name := self.name + "Form";
+		result.entity := self;
+		result.title := self.name;
+		result.columns := 2;
+		
+		
+		//dslPackage.windows +=result.late resolveone(crudapp::EntryWindow);
+		//result.rows += self.properties -> map toRows();
+		
+		/*
+		// map attributes
+		result.rows += self.properties[crudapp::Attribute] -> map attributesToRows();
+		
+		
+		// map single-valued references
+		result.rows += self.properties[crudapp::Reference] -> map singleValuedReferencesToRows();
+		
+		result.rows += object crudapp::Row {
+			name:="rowButton";
+			elements+= object crudapp::Button{
+				name:="buttonCreateEdit";
+				action := Action::CREATE_EDIT;
+				text:=Action::CREATE_EDIT.toString();
+				}
+		};
+		
+		// map multi-valued references
+		result.rows += self.properties[crudapp::Reference] -> map singleMultivaluedReferencesToRows();
+	*/
+	}
 }
+
 
 
 // map helper
@@ -53,7 +71,7 @@ helper createRow(in input: crudapp::Property): crudapp::Row {
 
 
 // map attributes
-mapping inout crudapp::Attribute::attributesToRows(): crudapp::Row {
+mapping crudapp::Attribute::attributesToRows(): crudapp::Row {
 	result:= createRow(self);
 }
 
@@ -71,14 +89,14 @@ mapping inout crudapp::Attribute::attributesToRows(): crudapp::Row {
 */
 
 // map single-valued references
-mapping inout crudapp::Reference::singleValuedReferencesToRows(): crudapp::Row {
+mapping crudapp::Reference::singleValuedReferencesToRows(): crudapp::Row {
 	if (self.multiplicity!=Multiplicity::MANY) then {
 		result:= createRow(self);
 	} endif
 }
 
 // map multi-valued references
-mapping inout crudapp::Reference::singleMultivaluedReferencesToRows(): crudapp::Row {
+mapping crudapp::Reference::singleMultivaluedReferencesToRows(): crudapp::Row {
 	if (self.multiplicity=Multiplicity::MANY) then {
 		result:= createRow(self);
 	} endif
