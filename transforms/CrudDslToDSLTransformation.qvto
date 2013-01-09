@@ -10,6 +10,18 @@ main() {
 mapping inout crudapp::Package::toPackage() {
 	init {
 	self.windows += self.entities -> map toEntryWindow();
+	
+	// check whether there is already an Entry Window of name beginning with entity name
+	// if clause doesn't
+	/*		
+	}self.entities->forEach(e){
+		self.windows[crudapp::EntryWindow] ->forEach(w){
+			if (w.name.startsWith(e.name)) then {
+			} else {
+				self.windows += e -> map toEntryWindow();
+			}endif;
+		};
+	};	*/
 	}
 }
 
