@@ -5,52 +5,50 @@ main() {
 	model.objectsOfType(Package) -> map toPackage();
 }
 
-property dslPackage : crudapp::Package = null;
-
 mapping inout crudapp::Package::toPackage() {
 	init {
-	dslPackage = self;
 	//doesn't work
-	//self.windows += self.entities -> map toEntryWindow();
-	self.windows += object crudapp::EntryWindow{name="blabla"};
+	self.windows += self.entities -> map toEntryWindow();
+	//self.windows -> map toChangeName();
 	}
 }
 
+// works
+mapping inout crudapp::Window::toChangeName()  {
+	self.name := "test";
+}
 
 
+mapping inout crudapp::Entity::toEntryWindow(): crudapp::EntryWindow {
+	result.name := self.name + "Form";
+	result.entity := self;
+	result.title := self.name;
+	result.columns := 2;
+	
+	
+	//result.rows += self.properties -> map toRows();
+	
+	/*
+	// map attributes
+	result.rows += self.properties[crudapp::Attribute] -> map attributesToRows();
+	
+	
+	// map single-valued references
+	result.rows += self.properties[crudapp::Reference] -> map singleValuedReferencesToRows();
+	
+	result.rows += object crudapp::Row {
+		name:="rowButton";
+		elements+= object crudapp::Button{
+			name:="buttonCreateEdit";
+			action := Action::CREATE_EDIT;
+			text:=Action::CREATE_EDIT.toString();
+			}
+	};
+	
+	// map multi-valued references
+	result.rows += self.properties[crudapp::Reference] -> map singleMultivaluedReferencesToRows();
+*/
 
-mapping crudapp::Entity::toEntryWindow(): crudapp::EntryWindow {
-	init {
-		result.name := self.name + "Form";
-		result.entity := self;
-		result.title := self.name;
-		result.columns := 2;
-		
-		
-		//dslPackage.windows +=result.late resolveone(crudapp::EntryWindow);
-		//result.rows += self.properties -> map toRows();
-		
-		/*
-		// map attributes
-		result.rows += self.properties[crudapp::Attribute] -> map attributesToRows();
-		
-		
-		// map single-valued references
-		result.rows += self.properties[crudapp::Reference] -> map singleValuedReferencesToRows();
-		
-		result.rows += object crudapp::Row {
-			name:="rowButton";
-			elements+= object crudapp::Button{
-				name:="buttonCreateEdit";
-				action := Action::CREATE_EDIT;
-				text:=Action::CREATE_EDIT.toString();
-				}
-		};
-		
-		// map multi-valued references
-		result.rows += self.properties[crudapp::Reference] -> map singleMultivaluedReferencesToRows();
-	*/
-	}
 }
 
 
