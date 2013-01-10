@@ -9,19 +9,20 @@ main() {
 // map package
 mapping inout crudapp::Package::toPackage() {
 	init {
-	self.windows += self.entities -> map toEntryWindow();
+	// works fine, but missing check for already available EntryWindows
+	//self.windows += self.entities -> map toEntryWindow();
 	
-	// check whether there is already an Entry Window of name beginning with entity name
-	// if clause doesn't
-	/*		
-	}self.entities->forEach(e){
+	// Following approach is better and works:
+	// Check whether there is already an Entry Window of name beginning with entity name
+	// If not, map entity to new EntityWindow			
+	self.entities->forEach(e){
 		self.windows[crudapp::EntryWindow] ->forEach(w){
-			if (w.name.startsWith(e.name)) then {
+			if (w.entity = e) then {
 			} else {
 				self.windows += e -> map toEntryWindow();
 			}endif;
 		};
-	};	*/
+	};	
 	}
 }
 
@@ -34,7 +35,7 @@ mapping inout crudapp::Entity::toEntryWindow(): crudapp::EntryWindow {
 	result.columns := 2;
 		
 	// map attributes
-	result.rows += self.properties[crudapp::Attribute] -> map attributesToRows();
+	result.rows += self.properties[crudapp::Attribute] -> map propertiesToRows();
 	
 	// create Button
 	result.rows += object crudapp::Row {
@@ -42,12 +43,11 @@ mapping inout crudapp::Entity::toEntryWindow(): crudapp::EntryWindow {
 		elements+= object crudapp::Button{
 			name:="buttonCreateEdit";
 			// Action is not properly displayed, for whatever reason
-			action := Action::CREATE_EDIT; 
+			action := crudapp::Action::CREATE_EDIT;
 			text:=Action::CREATE_EDIT.toString();
 			}
 	};
-	
-		
+			
 	//map References
 	var propertiesTEMP := self.properties[crudapp::Reference];
 
@@ -55,48 +55,34 @@ mapping inout crudapp::Entity::toEntryWindow(): crudapp::EntryWindow {
 	propertiesTEMP->forEach(p){
 		// map single-valued references	
 		if (p.multiplicity=Multiplicity::ONE) then{ 
-	    	result.rows += p -> map ReferencesToRows();
+	    	result.rows += p -> map propertiesToRows();
 	    }endif;
 	};	
 	
 	// map optional-valued references	
 	propertiesTEMP->forEach(p){	
 		if (p.multiplicity=Multiplicity::OPTIONAL) then{ 
-	    	result.rows += p -> map ReferencesToRows();
+	    	result.rows += p -> map propertiesToRows();
 	    }endif;
 	};
 	
 	// map multi-valued references
    	propertiesTEMP->forEach(p){	     	
 	    if (p.multiplicity=Multiplicity::MANY) then{ 
-	    	result.rows += p -> map ReferencesToRows();
+	    	result.rows += p -> map propertiesToRows();
 	    }endif; 	
     };
 }
 
 
-// map attributes
-mapping inout crudapp::Attribute::attributesToRows(): crudapp::Row {
+// map properties
+mapping inout crudapp::Property::propertiesToRows(): crudapp::Row {
 	name := "row" + self.name;
 	elements += self -> map createField();
 }
 
 // map Fields
-mapping inout crudapp::Attribute::createField(): crudapp::Field {
-	name := "field" + self.name;
-	_property := self;
-	label := object crudapp::FieldLabel {text:= self.name};
-}
-
-
-// map reference
-mapping crudapp::Reference::ReferencesToRows(): crudapp::Row {
-	name := "row" + self.name;
-	elements += self -> map createFieldForReference();
-}
-
-// map reference Fields
-mapping inout crudapp::Reference::createFieldForReference(): crudapp::Field {
+mapping inout crudapp::Property::createField(): crudapp::Field {
 	name := "field" + self.name;
 	_property := self;
 	label := object crudapp::FieldLabel {text:= self.name};
