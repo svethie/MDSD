@@ -1,0 +1,67 @@
+package de.wwu.pi.mdsd4.crudapp {
+	// Entity Model
+	
+	entity Pizza {
+		name: String
+		price: Integer
+		
+		orderPositions: many OrderPosition to pizza
+	}
+	
+	entity OrderPosition {
+		amount: Integer
+		specialRequests: String optional
+		
+		pizza: one Pizza to orderPositions
+		order: one Order to orderPositions
+	}
+	
+	entity Order {
+		orderedOn: DateTime
+		toBeDeliveredOn: DateTime optional
+		
+		orderPositions: many OrderPosition to order
+		customer: one Customer to orders
+		invoice: optional Invoice to order
+	}
+	
+	entity Customer {
+		familyName: String
+		givenName: String optional
+		address: String
+		
+		orders: many Order to customer
+	}
+	
+	entity Invoice {
+		total: Integer
+		chargedOn: DateTime optional
+		
+		order: one Order to invoice
+	}
+	
+	// User Interface Model
+	
+	list window CustomerList for Customer with title "Customer"
+	list window PizzaList for Pizza with title "Pizza"
+	list window OrderList for Order with title "Order"
+	list window InvoiceList for Invoice with title "Invoice"
+	list window OrderPositionsList for OrderPosition with title "Order positions"
+
+	// Existing EntryWindow for showing that existing EntryWindows are not created once more
+	entry window PizzaForm for Pizza with title "Pizza" with columns 2 {
+		row rowName {
+			field fieldName for name with label "Name"
+		}
+		row rowPrice {
+			field fieldPrice for price with label "Price"
+		}
+		row rowOrderPositions {
+			field fieldOrderPositions for orderPositions with label "Order positions"
+		}
+		row rowButtons {
+			button buttonCreate invokes create with text "Create/Edit"
+			button buttonDelete invokes delete with text "Delete"
+		}		
+	} 
+}

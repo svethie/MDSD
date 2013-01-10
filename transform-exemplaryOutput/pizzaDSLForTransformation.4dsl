@@ -1,0 +1,89 @@
+package de.wwu.pi.mdsd4.crudapp {
+	// Entity Model
+	
+	entity Pizza {
+		name: String
+		price: Integer
+		
+		orderPositions: many OrderPosition to pizza
+	}
+	
+	entity OrderPosition {
+		amount: Integer
+		specialRequests: String optional
+		
+		pizza: one Pizza to orderPositions
+		order: one Order to orderPositions
+	}
+	
+	entity Order {
+		orderedOn: DateTime
+		toBeDeliveredOn: DateTime optional
+		
+		orderPositions: many OrderPosition to order
+		customer: one Customer to orders
+		invoice: optional Invoice to order
+	}
+	
+	entity Customer {
+		familyName: String
+		givenName: String optional
+		address: String
+		
+		orders: many Order to customer
+	}
+	
+	entity Invoice {
+		total: Integer
+		chargedOn: DateTime optional
+		
+		order: one Order to invoice
+	}
+	
+	// User Interface Model
+	
+	list window CustomerList for Customer with title "Customer"
+	list window PizzaList for Pizza with title "Pizza"
+	list window OrderList for Order with title "Order"
+	list window InvoiceList for Invoice with title "Invoice"
+	list window OrderPositionsList for OrderPosition with title "Order positions"
+
+	entry window PizzaForm for Pizza with title "Pizza" with columns 2 {
+		row rowName {
+			field fieldName for name with label "Name"
+		}
+		row rowPrice {
+			field fieldPrice for price with label "Price"
+		}
+		row rowOrderPositions {
+			field fieldOrderPositions for orderPositions with label "Order positions"
+		}
+		row rowButtons {
+			button buttonCreate invokes create with text "Create/Edit"
+			button buttonDelete invokes delete with text "Delete"
+		}		
+	} entry window OrderPositionForm for OrderPosition with title "OrderPosition"
+with columns 2 { row rowamount { field fieldamount for amount with label
+"amount" } row rowspecialRequests { field fieldspecialRequests for
+specialRequests with label "specialRequests" } row rowButton { button
+buttonCreateEdit with text "create" } row rowpizza { field fieldpizza for
+pizza with label "pizza" } row roworder { field fieldorder for order
+with label "order" } } entry window OrderForm for Order with title "Order"
+with columns 2 { row roworderedOn { field fieldorderedOn for orderedOn
+with label "orderedOn" } row rowtoBeDeliveredOn { field fieldtoBeDeliveredOn
+for toBeDeliveredOn with label "toBeDeliveredOn" } row rowButton { button
+buttonCreateEdit with text "create" } row rowcustomer { field fieldcustomer
+for customer with label "customer" } row rowinvoice { field fieldinvoice for
+invoice with label "invoice" } row roworderPositions { field
+fieldorderPositions for orderPositions with label "orderPositions" } }
+entry window CustomerForm for Customer with title "Customer" with columns 2 {
+row rowfamilyName { field fieldfamilyName for familyName with label
+"familyName" } row rowgivenName { field fieldgivenName for givenName
+with label "givenName" } row rowaddress { field fieldaddress for address
+with label "address" } row rowButton { button buttonCreateEdit with text
+"create" } row roworders { field fieldorders for orders with label "orders" }
+} entry window InvoiceForm for Invoice with title "Invoice" with columns 2 {
+row rowtotal { field fieldtotal for total with label "total" } row
+rowchargedOn { field fieldchargedOn for chargedOn with label "chargedOn" } row
+rowButton { button buttonCreateEdit with text "create" } row roworder { field
+fieldorder for order with label "order" } } }
